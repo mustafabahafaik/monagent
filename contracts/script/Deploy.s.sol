@@ -5,20 +5,22 @@ import {Script, console} from "forge-std/Script.sol";
 import {VmSafe} from "forge-std/Vm.sol";
 import {AgentGuard} from "../src/AgentGuard.sol";
 
-/// @notice AgentGuard'ı deploy eder, başlangıç kurallarını kurar, kasaya MON yatırır ve
-///         adresi frontend/src/config.ts ile agent/config.js dosyalarına yazar.
+/// @notice AgentGuard'ı deploy eder, başlangıç kurallarını kurar ve adresi
+///         frontend/src/config.ts ile agent/config.js dosyalarına yazar.
 /// Simülasyon: forge script script/Deploy.s.sol --rpc-url monad_testnet
 /// Yayın:      forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast --gas-estimate-multiplier 200
-///             (Foundry gas'ı Ethereum tablosuyla tahmin eder; Monad bazı işlemleri pahalı fiyatlar.
-///              Pay bırakılmazsa son satırdaki kasaya yatırma out-of-gas ile düşebiliyor.)
 /// .env: PRIVATE_KEY (owner), AGENT_ADDRESS, PROVIDER_SECURESCAN, PROVIDER_LINTBOT
+///
+/// Kasaya MON yatırma BURADA YOK: Monad'ın "reserve balance" kuralına göre bakiyesi 10 MON'un altındaki
+/// bir hesap, son 3 blokta başka işlem gönderdiyse para gönderemez (işlem revert olur, gas yine kesilir).
+/// forge işlemleri art arda yolladığı için yatırma her seferinde düşüyordu. Yatırmayı npm run demo
+/// (agent/demo.js) bekleyerek ayrı yapar; elle: cast send <adres> --value 0.2ether (3 blok sonra).
 contract Deploy is Script {
     // 1 birim = 0.01 MON. Testnet MON kıt olduğu için ayarlar bu birimle ölçeklenir:
     // perTx 5 birim = 0.05 MON, budget 20 birim = 0.2 MON. Tek satırla değiştirilebilir.
     uint256 constant UNIT = 0.01 ether;
     uint256 constant PER_TX_LIMIT = 5 * UNIT;
     uint256 constant TOTAL_BUDGET = 20 * UNIT;
-    uint256 constant DEPOSIT = TOTAL_BUDGET; // bütçenin tamamı kasada: OverBudget demosu yapılabilsin
 
     string[3] internal SCOPE = ["security", "test", "lint"];
 
@@ -37,9 +39,6 @@ contract Deploy is Script {
         }
         guard.setProvider(secureScan, true);
         guard.setProvider(lintBot, true);
-
-        (bool ok,) = address(guard).call{value: DEPOSIT}("");
-        require(ok, "deposit failed");
         vm.stopBroadcast();
 
         console.log("AgentGuard adresi:", address(guard));

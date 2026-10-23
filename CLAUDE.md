@@ -84,7 +84,7 @@ klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/con
    Tasarım (2026-10-23, kullanıcının referans görsellerinden): mor-mavi gece teması, ortada maskot
    (public/mascot.png, kullanıcının verdiği ekran görüntüsünden daire kırpıldı), iki yanında SVG Atakule +
    Anıtkabir, arka planda dönen Monad amblemleri ve şehir silüeti. agentguard.html hiç verilmedi.
-6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
+6. **Demo provası** ✅ (npm run demo, testnet'te 2 tur): 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
    README, explorer linkleri, yedek plan (RPC çökerse yedek RPC, ekran kaydı).
 
 ## Monad public RPC sınırları (2026-10-23'te ölçüldü)
@@ -98,14 +98,23 @@ Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat
 Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma kısmı yeter.
 
 ## Testnet durumu (2026-10-23)
-- AgentGuard: `0x893E5bd8b1EB691348546c72b46cCb68D00B7452` (MonadVision'da doğrulandı, sourcify)
-  https://testnet.monadvision.com/address/0x893E5bd8b1EB691348546c72b46cCb68D00B7452 · DEPLOY_BLOCK 73524210
-- owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (monad-racer deployer'ı ile aynı)
-- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (gas: bir demo turu ~0.033 MON)
-- SecureScan `0x8bb16e6aab06B29C00b612f404ceb5da4497A74b` · LintBot `0x03657f0220e9308c4f6D38a212AE7EFbF92AC6e2` (allowlist)
-- TestRunner Pro `0x03090b1309907c668acb68eC45413ac70F5b5255` · GPU Burst `0xa338deF760FE72f34fC431f4841A5bAD7ce1591c`
-- İki demo turu yapıldı: spent 0.1 / 0.2 MON (kasa 0.1), pending #1 ve #2 onaylandı → **TestRunner allowlist'te**.
-  Pending sahnesini tekrar göstermek için demo öncesi: `cast send <GUARD> 'setProvider(address,bool)' <TESTRUNNER> false`.
-  Her tur 0.05 MON harcar: 2 tur sonra bütçe biter (OverBudget). Demo öncesi `setLimits` + kasaya MON ekle.
-- Eski deneme sözleşmesi `0x95DC…7184` boşaltıldı (0.1 MON owner'a döndü), kullanılmıyor.
+- AgentGuard: `0x88015611D942479441fC72B35794F503cE538B0D` (demo:fresh ile deploy; sourcify verify YAPILMADI)
+- owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (~1.9 MON kaldı; her deploy ~0.8 MON yakıyor → faucet)
+- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` · SecureScan `0x8bb1…A74b` · LintBot `0x0365…C6e2`
+  · TestRunner Pro `0x0309…5255` · GPU Burst `0xa338…591c`
+- İki demo turu yapıldı: spent 0.1 / 0.2 MON. `npm run demo` her turdan önce sahneyi kendisi hazırlar
+  (TestRunner'ı allowlist'ten çıkarır, bütçe/kasa/ajan gas'ı yetmezse tamamlar).
+- Eski sözleşmeler (0x95DC…7184, 0x893E…7452) boşaltıldı, kullanılmıyor.
 - Key'ler sadece `contracts/.env` ve `agent/.env` içinde (ikisi de gitignore'da).
+
+## Demo komutları (kökten)
+- `npm run demo` → sahne hazırlığı + servisler (:4020) + panel (:5180, tarayıcıda açılır) + ajan.
+  TestRunner Pro'yu kullanıcı panelden owner cüzdanıyla onaylar.
+- `npm run demo:rehearse` → aynısı, onayı script verir (--auto-approve). `--no-open`, `--exit` bayrakları var.
+- `npm run demo:fresh` → eski kasayı owner'a boşaltıp yeniden deploy eder.
+
+## Monad tuzakları (2026-10-23'te yaşandı)
+- **Reserve balance**: bakiyesi < 10 MON olan EOA, son 3 blokta işlem gönderdiyse MON transfer edemez
+  → işlem revert, gas kesilir, gasUsed = gasLimit görünür (out-of-gas sanılır!). forge script'in art arda
+  gönderdiği deposit bu yüzden düştü. Deploy.s.sol artık deposit yapmaz; demo.js sendValue 4 blok bekler.
+- Vite Windows'ta ::1'e (IPv6) bağlanıyor: port yoklaması 127.0.0.1 ile değil localhost ile yapılmalı.

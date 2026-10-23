@@ -1,0 +1,12 @@
+{
+  "name": "agentguard",
+  "private": true,
+  "description": "AI ajanlarının harcama yetkisini Monad üzerinde denetleyen güvenlik katmanı (hackathon demosu)",
+  "scripts": {
+    "setup": "npm --prefix agent install && npm --prefix frontend install",
+    "demo": "node agent/demo.js",
+    "demo:fresh": "node agent/demo.js --fresh",
+    "demo:rehearse": "node agent/demo.js --auto-approve",
+    "test": "cd contracts && forge test"
+  }
+}
