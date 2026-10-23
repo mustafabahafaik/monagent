@@ -150,7 +150,7 @@ export default function App() {
           <div className="stage-center">
             <Mascot reaction={reaction} pending={openPending > 0} />
             <div className="hero-caption">
-              <h1>AgentGuard</h1>
+              <h1>MONAGENT</h1>
               <p>Yapay zekâ ajanlarının harcama yetkisini zincirde denetleyen güvenlik katmanı</p>
               <div className="hero-status">
                 <span className={state && !stateError ? "live-dot" : "live-dot off"} />

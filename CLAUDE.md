@@ -1,4 +1,7 @@
-# Proje: AgentGuard (Monad hackathon, tek günlük demo)
+# Proje: MONAGENT (eski adı AgentGuard; Monad hackathon, tek günlük demo)
+
+Arayüz, README ve package adları MONAGENT. Solidity sözleşmesi, testler, deploy scripti ve ajan logları
+bilerek `AgentGuard` adıyla kaldı (sözleşme adını değiştirmek yeniden deploy gerektirir).
 
 Ben öğrenciyim. Bu projeyle Solidity, viem ve React öğrenmek istiyorum.
 - Her adımda önce ne yapacağını ve nedenini kısaca Türkçe açıkla.

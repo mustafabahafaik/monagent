@@ -1,4 +1,4 @@
-/* AgentGuard teması: mor-mavi gece, Monad moru (#836EF9) vurgu, Ankara silüeti.
+/* MONAGENT teması: mor-mavi gece, Monad moru (#836EF9) vurgu, Ankara silüeti.
    Animasyonlar transform/opacity tabanlı (GPU'yu yormaz). Hareket azaltma açıksa sadece maskotun süzülmesi kalır. */
 :root {
   --bg-0: #050818;
@@ -94,9 +94,13 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .app { max-width: 1400px; margin: 0 auto; padding: 16px 20px 40px; }
 .header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 4px 0 8px; position: relative; z-index: 20; }
 .brand { display: flex; gap: 12px; align-items: center; }
-.brand-logo { color: var(--monad); filter: drop-shadow(0 0 8px rgba(131, 110, 249, 0.8)); }
-.brand strong { display: block; font-size: 20px; letter-spacing: 0.01em; }
-.brand-sub { font-size: 12px; color: var(--muted); }
+.brand-mark {
+  width: 34px; height: 34px; display: grid; place-items: center; flex: none; border-radius: 10px;
+  background: linear-gradient(135deg, var(--monad), #5b3fe0); color: #fff;
+  font: 700 14px/1 var(--font); letter-spacing: 0.02em;
+  box-shadow: 0 0 0 1px rgba(179, 166, 255, 0.4), 0 0 16px rgba(131, 110, 249, 0.6);
+}
+.brand strong { font-size: 20px; line-height: 1; letter-spacing: 0.08em; }
 .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* ================= Sahne: ortada maskot, iki yanda kapsüller ================= */
@@ -168,7 +172,8 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ================= Maskot ================= */
 .mascot-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1.02; }
-.hero-rings { position: absolute; inset: 0 0 6% 0; width: 100%; height: 94%; animation: spin 40s linear infinite; pointer-events: none; }
+/* Halkalar ve platform sabit: maskotla birlikte hareket etmez */
+.hero-rings { position: absolute; inset: 0 0 6% 0; width: 100%; height: 94%; pointer-events: none; z-index: 0; }
 .ring { fill: none; }
 .ring-dashed { stroke: var(--monad); stroke-width: 1.5; stroke-dasharray: 4 10; opacity: 0.7; }
 .ring-thin { stroke: var(--cyan); stroke-width: 1; opacity: 0.35; }
@@ -182,9 +187,9 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .hero-platform span:nth-child(2) { width: 72%; height: 42%; opacity: 0.6; animation: blink 3s ease-in-out infinite; }
 .hero-platform span:nth-child(3) { width: 44%; height: 24%; opacity: 0.9; background: rgba(90, 215, 255, 0.15); }
 
-/* Katman 1: idle süzülme + nefes */
+/* Katman 1: idle süzülme + nefes. Halkaların önünde ayrı katman; zıplarken dışarı taşabilir. */
 .mascot-bob {
-  position: absolute; left: 50%; top: 46%; width: 66%; aspect-ratio: 1; translate: -50% -50%;
+  position: absolute; left: 50%; top: 44%; width: 70%; aspect-ratio: 1; translate: -50% -50%; z-index: 2; overflow: visible;
   animation: bob 5s ease-in-out infinite, breathe-scale 3.6s ease-in-out infinite;
 }
 @keyframes bob { 0%, 100% { translate: -50% -50%; } 50% { translate: -50% -54%; } }
@@ -196,7 +201,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes sway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
 
 /* Katman 3: tek seferlik hareketler */
-.mascot-act { all: unset; display: block; width: 100%; height: 100%; border-radius: 50%; cursor: pointer; }
+.mascot-act { all: unset; display: block; width: 100%; height: 100%; cursor: pointer; overflow: visible; }
 .mascot-act:focus-visible { outline: 2px solid var(--monad-2); outline-offset: 6px; }
 .act-flip { animation: flip 0.9s cubic-bezier(0.2, 0.8, 0.3, 1); }
 .act-hop { animation: hop 0.6s ease-out; }
@@ -227,11 +232,37 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   80% { transform: translateX(2%) rotate(2deg); }
 }
 
+/* Şeffaf maskot: daire yok. Koyu mor dikenler zemine karışmasın diye görselin şeklini izleyen hafif ışık. */
 .mascot {
-  display: block; width: 100%; height: 100%; border-radius: 50%; user-select: none;
-  box-shadow: 0 0 0 4px rgba(131, 110, 249, 0.35), 0 0 70px rgba(131, 110, 249, 0.65), 0 0 140px rgba(61, 123, 255, 0.35);
+  display: block; width: 100%; height: 100%; object-fit: contain; user-select: none;
+  filter: drop-shadow(0 0 2px rgba(214, 206, 255, 0.9)) drop-shadow(0 0 22px rgba(131, 110, 249, 0.6));
 }
-.mascot-missing { display: grid; place-items: center; border: 2px dashed var(--line); color: var(--muted); font-size: 12px; }
+.mascot-missing { display: grid; place-items: center; border: 2px dashed var(--line); border-radius: 50%; color: var(--muted); font-size: 12px; }
+
+/* Gölge / ışık halkası: maskot yükselince küçülür ve solar, inince büyür.
+   Süreleri maskotunkilerle aynı (bob 5s, flip 0.9s, hop 0.6s) → eş zamanlı oynar. */
+.mascot-shadow {
+  position: absolute; left: 50%; top: 79%; width: 42%; height: 7%; translate: -50% -50%; z-index: 1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(90, 215, 255, 0.45), rgba(131, 110, 249, 0.3) 55%, transparent);
+  animation: shadow-bob 5s ease-in-out infinite;
+}
+@keyframes shadow-bob { 0%, 100% { scale: 1; opacity: 1; } 50% { scale: 0.88; opacity: 0.75; } }
+.sh-flip { animation: shadow-bob 5s ease-in-out infinite, shadow-flip 0.9s cubic-bezier(0.2, 0.8, 0.3, 1); }
+.sh-hop { animation: shadow-bob 5s ease-in-out infinite, shadow-hop 0.6s ease-out; }
+@keyframes shadow-flip {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.12, 1); }
+  45% { transform: scale(0.45); opacity: 0.35; }
+  72% { transform: scale(0.9); }
+  82% { transform: scale(1.18, 1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes shadow-hop {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.7); opacity: 0.6; }
+  80% { transform: scale(1.08, 1); }
+  100% { transform: scale(1); }
+}
 
 /* Onay / red halkası */
 .mascot-flash { position: absolute; inset: -5%; border-radius: 50%; border: 4px solid; pointer-events: none; animation: flash 1.2s ease-out forwards; }
@@ -344,5 +375,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
   .mascot-bob { animation: bob 6s ease-in-out infinite !important; }
+  .mascot-shadow { animation: shadow-bob 6s ease-in-out infinite !important; }
   .layer { translate: none !important; }
 }

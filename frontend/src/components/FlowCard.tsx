@@ -36,7 +36,7 @@ export function FlowCard({ items }: { items: Activity[] }) {
             </div>
           </li>
           <li>
-            <span className="flow-label">AgentGuard kararı</span>
+            <span className="flow-label">MONAGENT kararı</span>
             <span className={`pill ${DECISION[last.kind].tone}`}>{DECISION[last.kind].text}</span>
             {last.reason !== undefined && <div className="bad-text">{REJECT_REASONS[last.reason]}</div>}
           </li>

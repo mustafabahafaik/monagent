@@ -1,5 +1,5 @@
 {
-  "name": "agentguard",
+  "name": "monagent",
   "private": true,
   "description": "AI ajanlarının harcama yetkisini Monad üzerinde denetleyen güvenlik katmanı (hackathon demosu)",
   "scripts": {

@@ -1,5 +1,5 @@
 {
-  "name": "agentguard-agent",
+  "name": "monagent-agent",
   "private": true,
   "type": "module",
   "dependencies": {

@@ -1,7 +1,7 @@
-# AgentGuard
+# MONAGENT
 
 Yapay zekâ ajanları ücretli API'leri kendi başına kullanmaya başladı. Ama ajana cüzdanını
-verirsen ne kadar, kime, ne için harcayacağını kontrol edemezsin. **AgentGuard**, ajanın
+verirsen ne kadar, kime, ne için harcayacağını kontrol edemezsin. **MONAGENT**, ajanın
 harcama yetkisini Monad üzerindeki bir sözleşmeyle sınırlar:
 
 - Servis **HTTP 402 Payment Required** döner ("0.02 MON, şu adrese").
@@ -16,7 +16,7 @@ harcama yetkisini Monad üzerindeki bir sözleşmeyle sınırlar:
 
 | | |
 |---|---|
-| AgentGuard | [`0x88015611D942479441fC72B35794F503cE538B0D`](https://testnet.monadvision.com/address/0x88015611D942479441fC72B35794F503cE538B0D) |
+| Sözleşme (AgentGuard.sol) | [`0x88015611D942479441fC72B35794F503cE538B0D`](https://testnet.monadvision.com/address/0x88015611D942479441fC72B35794F503cE538B0D) |
 | Chain ID | 10143 |
 | Kurallar | tek işlem 0.05 MON · toplam bütçe 0.2 MON · kapsam: security, test, lint |
 
@@ -34,7 +34,7 @@ npm run demo      # servisler + panel + ajan, tek komut
 3. 402 servislerini (`:4020`) ve paneli (`:5180`) başlatır, paneli tarayıcıda açar.
 4. Ajanı çalıştırır:
 
-| Servis | Fiyat | Kategori | AgentGuard kararı |
+| Servis | Fiyat | Kategori | MONAGENT kararı |
 |---|---|---|---|
 | SecureScan | 0.02 MON | security | allowlist'te → **otomatik onay** |
 | TestRunner Pro | 0.03 MON | test | allowlist dışı → **panelden kullanıcı onayı** |

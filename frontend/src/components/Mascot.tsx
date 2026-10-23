@@ -1,8 +1,9 @@
-// Ortadaki maskot. Animasyonlar iç içe katmanlarda, böylece birbirini ezmez:
+// Ortadaki sahne. Sabit katman: halkalar + platform. Hareketli katman: sadece maskot görseli.
+// Maskot katmanları iç içe, böylece animasyonlar birbirini ezmez:
 //   .mascot-bob   → sürekli süzülme + nefes (idle)
 //   .mascot-sway  → onay beklerken yerinde sallanma
 //   .mascot-act   → tek seferlik hareket: takla / zıplama / kafa sallama (CSS keyframes)
-// Halka (.mascot-flash) onayda yeşil, redde kırmızı parlar.
+// Altındaki gölge (.mascot-shadow) aynı zamanlamayla küçülür/büyür: maskot yükselince küçülür.
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type Reaction = { kind: "approve" | "reject"; n: number };
@@ -46,6 +47,7 @@ export function Mascot({ reaction, pending }: { reaction: Reaction | null; pendi
 
   return (
     <div className="mascot-wrap">
+      {/* Sabit katman: maskotla birlikte hareket etmez */}
       <svg className="hero-rings" viewBox="0 0 400 400" aria-hidden="true">
         <circle cx="200" cy="200" r="188" className="ring ring-dashed" />
         <circle cx="200" cy="200" r="165" className="ring ring-thin" />
@@ -56,7 +58,9 @@ export function Mascot({ reaction, pending }: { reaction: Reaction | null; pendi
         <span />
         <span />
       </div>
+      <div className={act ? `mascot-shadow sh-${act}` : "mascot-shadow"} aria-hidden="true" />
 
+      {/* Hareketli katman: sadece maskot; dışarı taşabilir (overflow: visible) */}
       <div className="mascot-bob">
         <div className={pending ? "mascot-sway on" : "mascot-sway"}>
           <button
@@ -72,7 +76,7 @@ export function Mascot({ reaction, pending }: { reaction: Reaction | null; pendi
             {missing ? (
               <span className="mascot mascot-missing">public/mascot.png</span>
             ) : (
-              <img className="mascot" src="/mascot.png" alt="AgentGuard maskotu" onError={() => setMissing(true)} draggable={false} />
+              <img className="mascot" src="/mascot.png" alt="MONAGENT maskotu" onError={() => setMissing(true)} draggable={false} />
             )}
           </button>
           {flash && <span key={flash.n} className={`mascot-flash ${flash.tone}`} aria-hidden="true" />}
