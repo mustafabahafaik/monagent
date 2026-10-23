@@ -16,9 +16,7 @@ export function PendingList({ pendings, canAct, busyId, onDecide }: Props) {
   const closed = pendings.filter((p) => p.status !== 1).slice(-3).reverse();
 
   return (
-    <section className="card">
-      <h2 className="card-title">
-        <span className="icon">⏳</span> Onay bekleyenler {open.length > 0 && <span className="pill warn">{open.length}</span>}</h2>
+    <div className="detail-body">
       {open.length === 0 && <p className="muted">Bekleyen ödeme yok.</p>}
       <ul className="list">
         {open.map((p) => (
@@ -51,6 +49,6 @@ export function PendingList({ pendings, canAct, busyId, onDecide }: Props) {
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

@@ -15,10 +15,7 @@ export function FlowCard({ items }: { items: Activity[] }) {
   const last = items.find((a) => a.kind in DECISION);
 
   return (
-    <section className="card">
-      <h2 className="card-title">
-        <span className="icon">⇄</span> x402 ödeme akışı
-      </h2>
+    <div className="detail-body">
       {!last ? (
         <p className="muted">Henüz istek yok. Ajanı çalıştırınca burada canlı görünecek.</p>
       ) : (
@@ -51,6 +48,6 @@ export function FlowCard({ items }: { items: Activity[] }) {
           </li>
         </ol>
       )}
-    </section>
+    </div>
   );
 }

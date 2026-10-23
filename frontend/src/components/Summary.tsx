@@ -15,10 +15,7 @@ export function Summary({ state, activity }: { state: GuardState; activity: Acti
   const rejected = activity.filter((a) => a.kind === "Rejected").length;
 
   return (
-    <section className="card">
-      <h2 className="card-title">
-        <span className="icon">◔</span> Harcama özeti
-      </h2>
+    <div className="detail-body">
       <div className="big">
         {mon(state.spent)} <span className="muted">/ {mon(state.totalBudget)}</span>
       </div>
@@ -46,6 +43,6 @@ export function Summary({ state, activity }: { state: GuardState; activity: Acti
           </ul>
         </>
       )}
-    </section>
+    </div>
   );
 }

@@ -5,10 +5,7 @@ import { mon } from "../lib/format";
 
 export function Rules({ state }: { state: GuardState }) {
   return (
-    <section className="card">
-      <h2 className="card-title">
-        <span className="icon">⛨</span> Kurallar
-      </h2>
+    <div className="detail-body">
       <dl className="stats">
         <dt>Tek işlem limiti</dt>
         <dd>{mon(state.perTxLimit)}</dd>
@@ -36,6 +33,6 @@ export function Rules({ state }: { state: GuardState }) {
           </span>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

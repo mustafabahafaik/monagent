@@ -14,7 +14,7 @@ export function Stats({ items, openPending }: Props) {
   const circumference = 2 * Math.PI * r;
 
   return (
-    <section className="card stats-card">
+    <div className="stats-grid">
       <div className="stat">
         <span className="stat-label">Settled</span>
         <strong className="ok-text">{settled}</strong>
@@ -44,6 +44,6 @@ export function Stats({ items, openPending }: Props) {
           <strong>{total === 0 ? "—" : `%${rate}`}</strong>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

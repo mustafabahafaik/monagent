@@ -17,10 +17,7 @@ type Props = { items: Activity[]; pendings: PendingItem[]; loading: boolean };
 
 export function ActivityFeed({ items, pendings, loading }: Props) {
   return (
-    <section className="card">
-      <h2 className="card-title">
-        <span className="icon">≋</span> İşlem akışı <span className="live-dot" />
-      </h2>
+    <div className="detail-body">
       {loading && items.length === 0 && <p className="muted">Son event'ler okunuyor…</p>}
       {!loading && items.length === 0 && <p className="muted">Son 15 dakikada işlem yok. Ajanı çalıştır.</p>}
       <ul className="feed">
@@ -53,6 +50,6 @@ export function ActivityFeed({ items, pendings, loading }: Props) {
           );
         })}
       </ul>
-    </section>
+    </div>
   );
 }

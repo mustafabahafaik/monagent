@@ -58,7 +58,9 @@ agentguard/
         ├── config.ts     # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
         ├── lib/          # chain (client, explorer, etiketler), abi, wallet, format
         ├── hooks/        # useGuard (durum, multicall, 3 sn) · useActivity (event akışı)
-        └── components/   # Header, Summary, Rules, PendingList, ActivityFeed, Mascot
+        └── components/   # OrbitCard (kapsül: başlık+özet, tıklayınca detay), Mascot (takla/tepki
+                          # animasyonları), Backdrop (yıldız + parallax), Skyline (Atakule/Anıtkabir);
+                          # detay gövdeleri: FlowCard, Rules, PendingList, Summary, ActivityFeed, Stats
 ```
 config.ts / config.js repoda sıfır adresli yer tutucu olarak durur: Foundry, var olmayan
 klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/config.ts`'i silme.
