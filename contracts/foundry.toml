@@ -9,6 +9,12 @@ evm_version = "cancun"
 bytecode_hash = "none"
 use_literal_content = true
 
+# Deploy scripti adresi frontend ve agent config dosyalarına yazabilsin (Foundry varsayılanda dışarı yazmaz)
+fs_permissions = [
+  { access = "write", path = "../frontend/src" },
+  { access = "write", path = "../agent" },
+]
+
 # --rpc-url monad_testnet yazınca kullanılacak adres
 [rpc_endpoints]
 monad_testnet = "https://testnet-rpc.monad.xyz"

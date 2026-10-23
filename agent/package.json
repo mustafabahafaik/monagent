@@ -1,0 +1,14 @@
+{
+  "name": "agentguard-agent",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "express": "^4.22.3",
+    "picocolors": "^1.1.1",
+    "viem": "^2.57.10"
+  },
+  "scripts": {
+    "services": "node services.js",
+    "agent": "node agent.js"
+  }
+}

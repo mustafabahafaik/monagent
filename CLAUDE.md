@@ -26,8 +26,8 @@ Panel, owner'ın bütçeyi, ödeme akışını, bekleyen onayları ve reddedilen
 
 ## Teknoloji
 - `contracts/`: Foundry, Solidity
-- `server/`: Node + Express (402 dönen sahte servisler) + ajan scripti (viem)
-- `panel/`: Vite + React + viem
+- `agent/`: Node + Express (402 dönen sahte servisler) + ajan scripti (viem, ESM)
+- `frontend/`: Vite + React + TypeScript + viem (panel)
 - Tasarım referansı: `agentguard.html` (henüz yok)
 
 ## Ağ: Monad Testnet (docs.monad.xyz'den doğrulandı, 2026-10-23)
@@ -40,32 +40,36 @@ Panel, owner'ın bütçeyi, ödeme akışını, bekleyen onayları ve reddedilen
 ```
 agentguard/
 ├── CLAUDE.md
-├── README.md
-├── contracts/            # forge init ile oluşur
+├── contracts/
+│   ├── .env              # PRIVATE_KEY (owner), AGENT_ADDRESS, PROVIDER_* (git'e girmez)
 │   ├── src/AgentGuard.sol
 │   ├── test/AgentGuard.t.sol
-│   └── script/Deploy.s.sol
-├── server/
-│   ├── package.json
-│   ├── .env              # AGENT_PRIVATE_KEY, GUARD_ADDRESS (git'e girmez!)
-│   ├── services.js       # 402 dönen sahte API'ler (hava durumu, çeviri...)
-│   ├── agent.js          # 402 al → sözleşmeyle öde → tekrar iste
-│   └── abi.js
-└── panel/                # npm create vite ile oluşur
-    └── src/
-        ├── App.jsx
-        ├── chain.js      # viem client'ları, Monad testnet tanımı
-        └── abi.js
+│   └── script/Deploy.s.sol   # deploy + frontend/src/config.ts ve agent/config.js'i yazar
+├── agent/                # npm run services · npm run agent -- "görev"
+│   ├── .env              # AGENT_PRIVATE_KEY, PROVIDER_* adres/key (git'e girmez)
+│   ├── config.js         # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
+│   ├── chain.js          # viem client'ları; RPC_URL/GUARD_ADDRESS env ile ezilebilir
+│   ├── abi.js · log.js   # okunabilir ABI (parseAbi) · renkli logger
+│   ├── services.js       # :4020 SecureScan / TestRunner Pro / GPU Burst
+│   └── agent.js          # 402 al → requestPayment → (Pending ise event bekle) → X-Payment-Tx ile tekrar
+└── frontend/             # Vite + React + TS
+    └── src/config.ts     # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
 ```
+config.ts / config.js repoda sıfır adresli yer tutucu olarak durur: Foundry, var olmayan
+klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/config.ts`'i silme.
 
 ## 6 adımlık plan (her adım sonunda commit)
 1. **Sözleşme + testler** ✅: `AgentGuard.sol` + 20 test, her karar yolu kapsanıyor (`forge test`).
-2. **Testnet'e deploy** ✅: Faucet'ten MON al, `forge script` ile deploy et, sözleşmeye
-   bütçe yatır, servis adreslerini allowlist'e ekle. `cast call` ile doğrula.
-3. **402 servisleri**: Express'te 2-3 uç nokta. Ödeme kanıtı yoksa 402 + fiyat + adres +
-   requestId döner. Kanıt (tx hash) gelirse zincirden `Settled` event'ini (purposeHash eşleşmeli) kontrol edip 200 döner.
-4. **Ajan scripti**: `agent.js` servisleri sırayla çağırır, 402 gelince `requestPayment()` çağırır, tx
-   hash ile tekrar ister. Limit aşımı ve izinsiz servis senaryolarında reddedildiğini gösterir.
+2. **Testnet'e deploy**: `forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast`
+   (simülasyon için --broadcast'sız; config dosyaları sadece yayında yazılır). `cast call` ile doğrula.
+   Ayarlar (1 birim = 0.01 MON): perTx 5, budget 20, allowlist [SecureScan, LintBot],
+   scope [security, test, lint]. Kasaya bütçenin tamamı (0.2 MON) yatırılır.
+3. **402 servisleri** ✅ (anvil'de): ödemesiz → 402 {amount (wei, string), payTo, category}.
+   X-Payment-Tx → makbuzda GUARD_ADDRESS'ten gelen, payTo/tutar/kategori eşleşen `Settled` aranır;
+   aynı tx ikinci kez kabul edilmez (bellekte). Demo: SecureScan 0.02 security (allowlist → Settled),
+   TestRunner Pro 0.03 test (allowlist dışı → Pending), GPU Burst 0.08 compute (perTx aşımı → Rejected).
+4. **Ajan scripti** ✅ (anvil'de): Pending'de PendingApproved/PendingRejected event'ini 1 sn'de bir
+   yeni bloklarda arar (10 dk zaman aşımı); onayda approve tx'inin hash'ini servise gönderir.
 5. **Panel**: viem ile bütçe/harcanan/kalan, canlı ödeme akışı (event'ler), engellenenler,
    bekleyen ödemeleri onayla/reddet ve limit ayarı (cüzdan bağlayarak). Tasarım `agentguard.html`'e göre.
 6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
@@ -76,11 +80,10 @@ Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat
 Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma kısmı yeter.
 
 ## Testnet durumu (2026-10-23)
-- AgentGuard: `0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184` (MonadVision'da doğrulandı, sourcify)
-  https://testnet.monadvision.com/address/0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184
+- Güncel AgentGuard: henüz yok, yeni Deploy.s.sol yayınlanmadı (adres config dosyalarına yazılacak).
+- ESKİ (data/ai kurallı ilk deneme, kullanılmıyor): `0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184`,
+  kasasında 0.1 MON var → owner `withdraw` ile geri çekilebilir.
 - owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (monad-racer deployer'ı ile aynı)
-- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (key: server/.env AGENT_PRIVATE_KEY)
-- provider weather (allowlist'te): `0x6416118B3e7e90F5DBb6Bf61dd2B9899bDa749ED`
-- provider translate (allowlist'te değil → Pending demosu): `0x6F2287fef14eBD17ddE2FA67c97098AB19c90072`
-- Kurallar: perTx 0.01 MON, totalBudget 0.05 MON, kategoriler `data` ve `ai` (keccak256), `gambling` kapalı
-- Key'ler sadece `contracts/.env` ve `server/.env` içinde (ikisi de gitignore'da).
+- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (gas için 0.3 MON var)
+- SecureScan: `0x8bb16e6aab06B29C00b612f404ceb5da4497A74b` · LintBot: `0x03657f0220e9308c4f6D38a212AE7EFbF92AC6e2`
+- Key'ler sadece `contracts/.env` ve `agent/.env` içinde (ikisi de gitignore'da).
