@@ -52,8 +52,13 @@ agentguard/
 │   ├── abi.js · log.js   # okunabilir ABI (parseAbi) · renkli logger
 │   ├── services.js       # :4020 SecureScan / TestRunner Pro / GPU Burst
 │   └── agent.js          # 402 al → requestPayment → (Pending ise event bekle) → X-Payment-Tx ile tekrar
-└── frontend/             # Vite + React + TS
-    └── src/config.ts     # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
+└── frontend/             # Vite + React + TS + viem · npm run dev (önizleme: 5180)
+    ├── public/mascot.png # HENÜZ YOK
+    └── src/
+        ├── config.ts     # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
+        ├── lib/          # chain (client, explorer, etiketler), abi, wallet, format
+        ├── hooks/        # useGuard (durum, multicall, 3 sn) · useActivity (event akışı)
+        └── components/   # Header, Summary, Rules, PendingList, ActivityFeed, Mascot
 ```
 config.ts / config.js repoda sıfır adresli yer tutucu olarak durur: Foundry, var olmayan
 klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/config.ts`'i silme.
@@ -71,10 +76,19 @@ klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/con
    TestRunner Pro 0.03 test (allowlist dışı → Pending), GPU Burst 0.08 compute (perTx aşımı → Rejected).
 4. **Ajan scripti** ✅ (testnet'te çalıştı): Pending'de PendingApproved/PendingRejected event'ini 1 sn'de bir
    yeni bloklarda arar (10 dk zaman aşımı); onayda approve tx'inin hash'ini servise gönderir.
-5. **Panel**: viem ile bütçe/harcanan/kalan, canlı ödeme akışı (event'ler), engellenenler,
-   bekleyen ödemeleri onayla/reddet ve limit ayarı (cüzdan bağlayarak). Tasarım `agentguard.html`'e göre.
+5. **Panel** 🟡: veri katmanı ve bileşenler çalışıyor (testnet'te canlı doğrulandı). Özet/limit/allowlist/
+   scope/pending sözleşme durumundan (multicall), işlem akışı event'lerden. Onayla/Reddet önce simulate,
+   sonra cüzdanla approvePending/rejectPending (gerçek cüzdanla henüz denenmedi).
+   **Eksik: `agentguard.html` tasarımı ve `public/mascot.png` henüz verilmedi** → index.css geçici;
+   gelince sadece görünüm değişecek, hook'lar aynı kalır.
 6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
    README, explorer linkleri, yedek plan (RPC çökerse yedek RPC, ekran kaydı).
+
+## Monad public RPC sınırları (2026-10-23'te ölçüldü)
+- `eth_getLogs` en fazla **100 blok** (testnet-rpc.monad.xyz ve rpc-testnet.monadinfra.com ikisi de).
+  Zincir ~2.7 blok/sn → panel geçmişin tamamını değil son ~2400 bloğu (~15 dk) okuyor, sonra canlı takip.
+- Saniyede **15 istek**: JSON-RPC batch'teki her çağrı ayrı sayılır. Okumalar Multicall3 ile
+  (`0xcA11bde05977b3631167028862bE2a173976CA11`, testnet'te kurulu) tek eth_call'a toplanıyor.
 
 ## Zaman kutusu (tek gün)
 Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat.
@@ -87,8 +101,8 @@ Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma 
 - agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (gas: bir demo turu ~0.033 MON)
 - SecureScan `0x8bb16e6aab06B29C00b612f404ceb5da4497A74b` · LintBot `0x03657f0220e9308c4f6D38a212AE7EFbF92AC6e2` (allowlist)
 - TestRunner Pro `0x03090b1309907c668acb68eC45413ac70F5b5255` · GPU Burst `0xa338deF760FE72f34fC431f4841A5bAD7ce1591c`
-- İlk demo turu yapıldı: spent 0.05 / 0.2 MON, pending #1 onaylandı → **TestRunner artık allowlist'te**.
+- İki demo turu yapıldı: spent 0.1 / 0.2 MON (kasa 0.1), pending #1 ve #2 onaylandı → **TestRunner allowlist'te**.
   Pending sahnesini tekrar göstermek için demo öncesi: `cast send <GUARD> 'setProvider(address,bool)' <TESTRUNNER> false`.
-  Her tur 0.05 MON harcar: 3 tur sonra bütçe biter (OverBudget). Gerekirse `setLimits` ile bütçeyi artır.
+  Her tur 0.05 MON harcar: 2 tur sonra bütçe biter (OverBudget). Demo öncesi `setLimits` + kasaya MON ekle.
 - Eski deneme sözleşmesi `0x95DC…7184` boşaltıldı (0.1 MON owner'a döndü), kullanılmıyor.
 - Key'ler sadece `contracts/.env` ve `agent/.env` içinde (ikisi de gitignore'da).
