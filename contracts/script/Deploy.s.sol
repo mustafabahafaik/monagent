@@ -8,7 +8,9 @@ import {AgentGuard} from "../src/AgentGuard.sol";
 /// @notice AgentGuard'ı deploy eder, başlangıç kurallarını kurar, kasaya MON yatırır ve
 ///         adresi frontend/src/config.ts ile agent/config.js dosyalarına yazar.
 /// Simülasyon: forge script script/Deploy.s.sol --rpc-url monad_testnet
-/// Yayın:      forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast
+/// Yayın:      forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast --gas-estimate-multiplier 200
+///             (Foundry gas'ı Ethereum tablosuyla tahmin eder; Monad bazı işlemleri pahalı fiyatlar.
+///              Pay bırakılmazsa son satırdaki kasaya yatırma out-of-gas ile düşebiliyor.)
 /// .env: PRIVATE_KEY (owner), AGENT_ADDRESS, PROVIDER_SECURESCAN, PROVIDER_LINTBOT
 contract Deploy is Script {
     // 1 birim = 0.01 MON. Testnet MON kıt olduğu için ayarlar bu birimle ölçeklenir:

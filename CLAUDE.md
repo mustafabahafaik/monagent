@@ -60,15 +60,16 @@ klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/con
 
 ## 6 adımlık plan (her adım sonunda commit)
 1. **Sözleşme + testler** ✅: `AgentGuard.sol` + 20 test, her karar yolu kapsanıyor (`forge test`).
-2. **Testnet'e deploy**: `forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast`
+2. **Testnet'e deploy** ✅: `forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast --gas-estimate-multiplier 200`
+   (pay şart: Foundry gas'ı Ethereum tablosuyla tahmin ediyor, 2026-10-23'te kasaya yatırma out-of-gas ile düştü)
    (simülasyon için --broadcast'sız; config dosyaları sadece yayında yazılır). `cast call` ile doğrula.
    Ayarlar (1 birim = 0.01 MON): perTx 5, budget 20, allowlist [SecureScan, LintBot],
    scope [security, test, lint]. Kasaya bütçenin tamamı (0.2 MON) yatırılır.
-3. **402 servisleri** ✅ (anvil'de): ödemesiz → 402 {amount (wei, string), payTo, category}.
+3. **402 servisleri** ✅ (testnet'te çalıştı): ödemesiz → 402 {amount (wei, string), payTo, category}.
    X-Payment-Tx → makbuzda GUARD_ADDRESS'ten gelen, payTo/tutar/kategori eşleşen `Settled` aranır;
    aynı tx ikinci kez kabul edilmez (bellekte). Demo: SecureScan 0.02 security (allowlist → Settled),
    TestRunner Pro 0.03 test (allowlist dışı → Pending), GPU Burst 0.08 compute (perTx aşımı → Rejected).
-4. **Ajan scripti** ✅ (anvil'de): Pending'de PendingApproved/PendingRejected event'ini 1 sn'de bir
+4. **Ajan scripti** ✅ (testnet'te çalıştı): Pending'de PendingApproved/PendingRejected event'ini 1 sn'de bir
    yeni bloklarda arar (10 dk zaman aşımı); onayda approve tx'inin hash'ini servise gönderir.
 5. **Panel**: viem ile bütçe/harcanan/kalan, canlı ödeme akışı (event'ler), engellenenler,
    bekleyen ödemeleri onayla/reddet ve limit ayarı (cüzdan bağlayarak). Tasarım `agentguard.html`'e göre.
@@ -80,10 +81,14 @@ Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat
 Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma kısmı yeter.
 
 ## Testnet durumu (2026-10-23)
-- Güncel AgentGuard: henüz yok, yeni Deploy.s.sol yayınlanmadı (adres config dosyalarına yazılacak).
-- ESKİ (data/ai kurallı ilk deneme, kullanılmıyor): `0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184`,
-  kasasında 0.1 MON var → owner `withdraw` ile geri çekilebilir.
+- AgentGuard: `0x893E5bd8b1EB691348546c72b46cCb68D00B7452` (MonadVision'da doğrulandı, sourcify)
+  https://testnet.monadvision.com/address/0x893E5bd8b1EB691348546c72b46cCb68D00B7452 · DEPLOY_BLOCK 73524210
 - owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (monad-racer deployer'ı ile aynı)
-- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (gas için 0.3 MON var)
-- SecureScan: `0x8bb16e6aab06B29C00b612f404ceb5da4497A74b` · LintBot: `0x03657f0220e9308c4f6D38a212AE7EFbF92AC6e2`
+- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (gas: bir demo turu ~0.033 MON)
+- SecureScan `0x8bb16e6aab06B29C00b612f404ceb5da4497A74b` · LintBot `0x03657f0220e9308c4f6D38a212AE7EFbF92AC6e2` (allowlist)
+- TestRunner Pro `0x03090b1309907c668acb68eC45413ac70F5b5255` · GPU Burst `0xa338deF760FE72f34fC431f4841A5bAD7ce1591c`
+- İlk demo turu yapıldı: spent 0.05 / 0.2 MON, pending #1 onaylandı → **TestRunner artık allowlist'te**.
+  Pending sahnesini tekrar göstermek için demo öncesi: `cast send <GUARD> 'setProvider(address,bool)' <TESTRUNNER> false`.
+  Her tur 0.05 MON harcar: 3 tur sonra bütçe biter (OverBudget). Gerekirse `setLimits` ile bütçeyi artır.
+- Eski deneme sözleşmesi `0x95DC…7184` boşaltıldı (0.1 MON owner'a döndü), kullanılmıyor.
 - Key'ler sadece `contracts/.env` ve `agent/.env` içinde (ikisi de gitignore'da).
