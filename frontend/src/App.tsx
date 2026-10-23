@@ -5,6 +5,7 @@ import { Backdrop } from "./components/Backdrop";
 import { FlowCard } from "./components/FlowCard";
 import { Header } from "./components/Header";
 import { Mascot, type Reaction } from "./components/Mascot";
+import { ChainScene, DecisionScene, FlowScene, PendingScene, RulesScene, SpendScene, type Pulse } from "./components/MiniScenes";
 import { OrbitCard, type Slot } from "./components/OrbitCard";
 import { PendingList } from "./components/PendingList";
 import { Rules } from "./components/Rules";
@@ -50,6 +51,7 @@ export default function App() {
   const [notice, setNotice] = useState<{ text: string; tx?: `0x${string}`; bad?: boolean } | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [reaction, setReaction] = useState<Reaction | null>(null);
+  const [pulse, setPulse] = useState<Pulse | null>(null); // mini sahneler için: canlı gelen her yeni event
   const seen = useRef(new Set<string>());
 
   const isOwner = !!wallet && !!state && wallet.account.toLowerCase() === state.owner.toLowerCase();
@@ -74,6 +76,7 @@ export default function App() {
     const fresh = activity.items.filter((a) => !seen.current.has(a.key));
     fresh.forEach((a) => seen.current.add(a.key));
     if (activity.loading || fresh.length === 0) return;
+    setPulse((prev) => ({ kinds: fresh.map((a) => a.kind), n: (prev?.n ?? 0) + 1 }));
     const newest = fresh.find((a) => a.kind !== "PendingCreated"); // liste yeniden eskiye sıralı
     if (!newest) return;
     const kind = newest.kind === "Settled" || newest.kind === "PendingApproved" ? "approve" : "reject";
@@ -120,8 +123,30 @@ export default function App() {
   const failed = activity.items.filter((a) => a.kind === "Rejected" || a.kind === "PendingRejected").length;
   const loadingText = "okunuyor…";
 
+  // Mini sahnelerin tepki sayaçları: ilgili event geldiyse o pulse/reaction numarası, değilse 0 (sakin)
+  const pulseHas = (...kinds: string[]) => (pulse && pulse.kinds.some((k) => kinds.includes(k)) ? pulse.n : 0);
+  const scenes: Record<string, ReactNode> = {
+    stats: <DecisionScene burst={reaction && { tone: reaction.kind === "approve" ? "ok" : "bad", n: reaction.n }} />,
+    flow: <FlowScene hop={pulseHas("Settled", "Rejected", "PendingCreated")} />,
+    rules: <RulesScene alarm={reaction?.kind === "reject" ? reaction.n : 0} />,
+    summary: <SpendScene ratio={state && state.totalBudget > 0n ? Number((state.spent * 1000n) / state.totalBudget) / 1000 : 0} />,
+    feed: <ChainScene snap={pulse?.n ?? 0} />,
+    pending: <PendingScene waiting={openPending > 0} joy={pulseHas("PendingApproved")} />,
+  };
+
   const card = (id: string, icon: string, title: string, summary: ReactNode, body: ReactNode, tone?: "warn") => (
-    <OrbitCard key={id} id={id} icon={icon} title={title} summary={summary} tone={tone} slot={SLOTS[id]} open={openId === id} onToggle={toggle}>
+    <OrbitCard
+      key={id}
+      id={id}
+      icon={icon}
+      title={title}
+      summary={summary}
+      tone={tone}
+      slot={SLOTS[id]}
+      open={openId === id}
+      onToggle={toggle}
+      scene={scenes[id]}
+    >
       {body}
     </OrbitCard>
   );

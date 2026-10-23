@@ -21,10 +21,11 @@ type Props = {
   slot: Slot;
   open: boolean;
   onToggle: (id: string) => void;
+  scene?: ReactNode; // karta tutunan mini maskot sahnesi (MiniScenes.tsx)
   children: ReactNode;
 };
 
-export function OrbitCard({ id, icon, title, summary, tone, slot, open, onToggle, children }: Props) {
+export function OrbitCard({ id, icon, title, summary, tone, slot, open, onToggle, scene, children }: Props) {
   const style = {
     "--top": slot.top,
     "--inset": slot.inset,
@@ -40,6 +41,7 @@ export function OrbitCard({ id, icon, title, summary, tone, slot, open, onToggle
       style={style}
       data-capsule={id}
     >
+      {scene}
       <button className="capsule-head" onClick={() => onToggle(id)} aria-expanded={open}>
         <span className="icon">{icon}</span>
         <span className="capsule-text">

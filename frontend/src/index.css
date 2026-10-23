@@ -346,6 +346,217 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 .notice.bad { border-color: var(--bad); color: var(--bad); }
 
+/* ================= Mini sahneler: kartlara tutunan küçük maskotlar ================= */
+/* Süreler --spd ile çarpılır: kapalıyken 1 (sakin), hover'da 0.45 (hızlı). Açık kartta sahne büyür.
+   Ana maskottan ayrışsın diye daha küçük ve hafif soluk. Hepsi transform/opacity. */
+.mini { position: absolute; z-index: 3; pointer-events: none; --spd: 1; opacity: 0.9; transition: scale 0.5s var(--ease); }
+.capsule.open .mini { scale: 1.25; }
+@media (hover: hover) and (min-width: 768px) {
+  .capsule:hover .mini { --spd: 0.45; }
+}
+.mini-mascot { display: block; width: 44px; height: 44px; }
+.mini-mascot img {
+  display: block; width: 100%; height: 100%; object-fit: contain; user-select: none;
+  filter: saturate(0.85) brightness(0.92) drop-shadow(0 0 5px rgba(131, 110, 249, 0.55));
+}
+.mini-act { display: block; }
+.mini-fx { position: absolute; pointer-events: none; }
+.mini-fx i { position: absolute; font-style: normal; }
+
+/* 1) Kararlar: sol kenara iki eliyle asılı, "?" süzülür, karar gelince ✓/✕ fışkırır */
+.mini-decision { left: -30px; top: 6px; width: 44px; height: 60px; }
+.mini-hands { position: absolute; left: 12px; top: -3px; width: 22px; height: 7px; z-index: 2; }
+.mini-hands::before, .mini-hands::after { content: ""; position: absolute; top: 0; width: 8px; height: 6px; border-radius: 50%; background: #f08cc2; box-shadow: 0 0 4px rgba(240, 140, 194, 0.6); }
+.mini-hands::before { left: 0; }
+.mini-hands::after { right: 0; }
+.mini-mascot.hang { transform-origin: 50% 0; animation: mini-hang calc(3s * var(--spd)) ease-in-out infinite; }
+@keyframes mini-hang { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+.questions { left: -8px; top: -14px; width: 62px; height: 40px; }
+.questions i {
+  left: calc(var(--i) * 12px); bottom: 0; font: 700 12px var(--font); color: var(--monad-2); opacity: 0;
+  animation: mini-q calc(3.2s * var(--spd)) ease-out infinite; animation-delay: calc(var(--i) * 0.64s * var(--spd));
+}
+@keyframes mini-q {
+  0% { opacity: 0; transform: translateY(0) rotate(0); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-34px) rotate(40deg); }
+}
+.burst { left: 12px; top: 10px; width: 1px; height: 1px; }
+.burst i { font: 800 15px var(--font); opacity: 0; animation: mini-burst 1.2s ease-out forwards; }
+.burst.ok i { color: var(--ok); text-shadow: 0 0 6px var(--ok); }
+.burst.bad i { color: var(--bad); text-shadow: 0 0 6px var(--bad); }
+.burst i:nth-child(1) { --dx: -26px; --dy: -18px; }
+.burst i:nth-child(2) { --dx: -12px; --dy: -32px; animation-delay: 0.05s; }
+.burst i:nth-child(3) { --dx: 4px; --dy: -38px; animation-delay: 0.1s; }
+.burst i:nth-child(4) { --dx: 20px; --dy: -30px; animation-delay: 0.15s; }
+.burst i:nth-child(5) { --dx: 30px; --dy: -14px; animation-delay: 0.2s; }
+@keyframes mini-burst {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  20% { opacity: 1; transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4)) scale(1.25); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1); }
+}
+
+/* 2) x402: üst kenarda oturur, önünden mor coin'ler soldan sağa kayar, yeni istekte zıplar */
+.mini-flow { top: -38px; right: 24px; width: 44px; height: 44px; }
+.mini-mascot.sit { animation: mini-sit calc(2.6s * var(--spd)) ease-in-out infinite; }
+@keyframes mini-sit { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+.coins { left: -86px; top: 30px; width: 150px; height: 10px; z-index: 2; }
+.coins i {
+  left: 0; top: 0; width: 9px; height: 9px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle at 35% 35%, #e2dcff, var(--monad) 60%, #4b35c9);
+  box-shadow: 0 0 6px rgba(131, 110, 249, 0.85);
+  animation: mini-coin calc(2.4s * var(--spd)) linear infinite; animation-delay: calc(var(--i) * 0.8s * var(--spd));
+}
+@keyframes mini-coin {
+  0% { opacity: 0; transform: translateX(0) scale(0.8); }
+  15%, 80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(140px) scale(1); }
+}
+.act-catch { animation: mini-catch 0.6s ease-out; }
+@keyframes mini-catch {
+  0% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(2px) scale(1.08, 0.9); }
+  50% { transform: translateY(-16px) scale(0.95, 1.06); }
+  80% { transform: translateY(1px) scale(1.06, 0.94); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* 3) Kurallar: kilidin arkasından bakar, ara sıra saklanır; retle kilit kırmızı parlar ve sallanır */
+.mini-rules { top: -36px; right: -14px; width: 50px; height: 52px; } /* kartın ">" okuna binmesin */
+.mini-mascot.peek { position: absolute; right: 6px; bottom: -2px; width: 38px; height: 38px; z-index: 1; animation: mini-peek calc(5s * var(--spd)) ease-in-out infinite; }
+/* Saklanırken aşağı kayıp solar: kilit küçük olduğu için sadece kaymak yetmiyor, maskot altından görünüyordu */
+@keyframes mini-peek {
+  0%, 55% { opacity: 1; transform: translateY(0) rotate(0); }
+  30% { opacity: 1; transform: translateY(0) rotate(-8deg); }
+  65%, 82% { opacity: 0; transform: translateY(12px) rotate(0); }
+  100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+.mini-lock {
+  position: absolute; right: 0; bottom: 0; width: 28px; height: 21px; z-index: 2; border-radius: 6px;
+  background: linear-gradient(180deg, var(--monad-2), var(--monad)); box-shadow: 0 0 10px rgba(131, 110, 249, 0.6);
+}
+.mini-lock::before { /* kilit halkası */
+  content: ""; position: absolute; left: 6px; top: -11px; width: 16px; height: 13px; box-sizing: border-box;
+  border: 3px solid #cfc6ff; border-bottom: 0; border-radius: 9px 9px 0 0;
+}
+.mini-lock::after { /* anahtar deliği */
+  content: ""; position: absolute; left: 12px; top: 7px; width: 4px; height: 7px; border-radius: 2px; background: #2a1f6b;
+}
+.mini-lock-glow { position: absolute; inset: -5px; border-radius: 9px; background: radial-gradient(closest-side, rgba(255, 107, 129, 0.95), rgba(255, 107, 129, 0)); opacity: 0; }
+.mini-lock.alarm { animation: mini-shake 0.6s ease-in-out; }
+.mini-lock.alarm .mini-lock-glow { animation: mini-glow 1.4s ease-out; }
+@keyframes mini-shake {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(5deg); }
+}
+@keyframes mini-glow { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 4) Harcama: kart altındaki çubukta harcanan oran kadar ilerler; %80+ terler ve kızarır */
+.mini-spend { left: 18px; right: 18px; bottom: -26px; height: 4px; } /* kartın altında: maskot yazıya binmesin */
+.mini-track { position: absolute; inset: 0; border-radius: 2px; overflow: hidden; background: rgba(131, 110, 249, 0.22); }
+.mini-track-fill {
+  position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(var(--p));
+  background: linear-gradient(90deg, var(--monad), var(--cyan)); transition: transform 0.8s var(--ease);
+}
+.mini-spend.hot .mini-track-fill { background: linear-gradient(90deg, var(--monad), var(--bad)); }
+/* Yürüyücü çubuk genişliğinde; translateX(%100 × oran) → maskot çubuğun ucuna kadar ilerler (layout değil transform) */
+.mini-walker { position: absolute; left: 0; bottom: 3px; width: 100%; height: 0; transform: translateX(calc(var(--p) * 100%)); transition: transform 0.8s var(--ease); }
+.mini-sweat-wrap { position: absolute; left: -17px; bottom: 0; width: 34px; height: 34px; }
+.walk-body { position: absolute; inset: 0; transform-origin: 50% 100%; animation: mini-walk calc(0.9s * var(--spd)) ease-in-out infinite; }
+.walk-body .mini-mascot { width: 34px; height: 34px; }
+@keyframes mini-walk {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-2px) rotate(5deg); }
+}
+.mini-heat { /* maskot şeklinde kırmızı katman: sadece opacity ile açılır */
+  position: absolute; inset: 0; background: #ff6b81; opacity: 0; transition: opacity 0.6s;
+  -webkit-mask: url(/mascot.png) center / contain no-repeat; mask: url(/mascot.png) center / contain no-repeat;
+}
+.mini-spend.hot .mini-heat { opacity: 0.42; }
+.mini-spend.hot .mini-sweat-wrap { animation: mini-tremble 0.16s linear infinite; }
+@keyframes mini-tremble { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
+.sweat { right: 0; top: 4px; width: 5px; height: 7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #8fd8ff; opacity: 0; }
+.mini-spend.hot .sweat { animation: mini-sweat 0.9s ease-in infinite; }
+@keyframes mini-sweat { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
+
+/* 5) İşlem akışı: alt kenarda blokları yukarı zincire iter; yeni işlemde bir blok "tık" diye oturur */
+.mini-chain { left: -18px; bottom: -24px; width: 44px; height: 44px; }
+.mini-chain .mini-mascot { animation: mini-push calc(1.2s * var(--spd)) ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes mini-push { 0%, 100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-3px) rotate(-7deg); } }
+.blocks { left: 16px; bottom: 40px; width: 12px; height: 60px; }
+.blocks i {
+  left: 0; bottom: 0; width: 11px; height: 11px; border-radius: 3px; opacity: 0;
+  border: 1.5px solid var(--monad-2); background: rgba(131, 110, 249, 0.35);
+  animation: mini-block calc(3s * var(--spd)) ease-out infinite; animation-delay: calc(var(--i) * 1s * var(--spd));
+}
+.blocks i::after { /* zincir halkası */
+  content: ""; position: absolute; left: 3.5px; top: 100%; width: 1.5px; height: 6px; background: var(--monad-2);
+}
+@keyframes mini-block {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  15% { opacity: 1; transform: translateY(-6px) scale(1); }
+  100% { opacity: 0; transform: translateY(-54px) scale(1); }
+}
+.snap-block {
+  left: 16px; bottom: 44px; width: 12px; height: 12px; border-radius: 3px; background: var(--ok);
+  box-shadow: 0 0 8px var(--ok); opacity: 0; animation: mini-snap 0.9s ease-out forwards;
+}
+@keyframes mini-snap {
+  0% { opacity: 0; transform: translateY(-16px) scale(1.5); }
+  35% { opacity: 1; transform: translateY(0) scale(0.85); }
+  55% { transform: translateY(0) scale(1.12); }
+  75% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* 6) Onay bekleyenler: kenarda oturup sallanır, kum saati döner; bekleyen varsa "!", onayda sevinç */
+.mini-pending { top: -38px; right: 14px; width: 74px; height: 44px; }
+.mini-pending .mini-act { position: absolute; right: 0; bottom: 0; }
+.mini-mascot.swing { transform-origin: 50% 100%; animation: mini-swing calc(2.2s * var(--spd)) ease-in-out infinite; }
+@keyframes mini-swing { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+.hourglass { left: 4px; bottom: 6px; width: 14px; height: 20px; animation: mini-hourglass calc(3s * var(--spd)) ease-in-out infinite; }
+.hourglass span {
+  position: absolute; inset: 2px 1px; background: linear-gradient(180deg, var(--warn) 0 38%, rgba(255, 200, 87, 0.25) 38% 62%, var(--warn) 62%);
+  clip-path: polygon(0 0, 100% 0, 58% 50%, 100% 100%, 0 100%, 42% 50%);
+}
+.hourglass::before, .hourglass::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; border-radius: 1px; background: var(--monad-2); }
+.hourglass::before { top: 0; }
+.hourglass::after { bottom: 0; }
+@keyframes mini-hourglass {
+  0%, 40% { transform: rotate(0); }
+  50%, 90% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+.alert {
+  right: 16px; top: -18px; font: 800 17px var(--font); color: var(--warn);
+  text-shadow: 0 0 8px rgba(255, 200, 87, 0.9); animation: mini-alert 1s ease-in-out infinite;
+}
+@keyframes mini-alert { 0%, 100% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.35); opacity: 1; } }
+.act-joy { animation: mini-joy 0.9s ease-out; }
+@keyframes mini-joy {
+  0% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(-14px) scale(0.95, 1.06) rotate(-8deg); }
+  40% { transform: translateY(0) scale(1.06, 0.94); }
+  60% { transform: translateY(-9px) rotate(8deg); }
+  100% { transform: translateY(0) scale(1, 1) rotate(0); }
+}
+
+/* Mobil: hepsi kartın sağ üst köşesinde, daha küçük; harcama çubuğu gizli */
+@media (max-width: 767px) {
+  .mini, .mini-decision, .mini-flow, .mini-rules, .mini-spend, .mini-chain, .mini-pending {
+    left: auto; bottom: auto; top: -16px; right: -4px; width: 44px; height: 44px; scale: 0.72; transform-origin: 100% 0;
+  }
+  .capsule.open .mini { scale: 0.85; }
+  .mini-hands, .mini-track { display: none; }
+  .mini-chain .blocks { display: none; } /* kartlar arası dar: yükselen bloklar üstteki kartın okuna biniyordu */
+  .mini-walker { transform: none; width: 44px; bottom: 0; left: 0; }
+  .mini-sweat-wrap { left: 5px; }
+  .mini-pending .hourglass { left: -18px; }
+}
+
 /* ================= Orta genişlik: kapsüller daralır ================= */
 @media (min-width: 768px) and (max-width: 1100px) {
   .capsule { width: calc(var(--w) * 0.86); }
@@ -383,4 +594,5 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   .mascot-bob { animation: bob 6s ease-in-out infinite !important; }
   .mascot-shadow { animation: shadow-bob 6s ease-in-out infinite !important; }
   .layer { translate: none !important; }
+  .mini-fx { display: none !important; } /* mini maskotlar sabit, efektler gizli */
 }
