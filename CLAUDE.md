@@ -100,6 +100,9 @@ klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/con
 Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat.
 Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma kısmı yeter.
 
+## GitHub
+- https://github.com/mustafabahafaik/monagent (public, main, ilk push 2026-10-23). Klasör adı hâlâ agentguard.
+
 ## Testnet durumu (2026-10-23)
 - AgentGuard: `0x88015611D942479441fC72B35794F503cE538B0D` (demo:fresh ile deploy; sourcify verify YAPILMADI)
 - owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (~1.9 MON kaldı; her deploy ~0.8 MON yakıyor → faucet)
