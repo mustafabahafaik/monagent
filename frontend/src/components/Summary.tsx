@@ -16,7 +16,9 @@ export function Summary({ state, activity }: { state: GuardState; activity: Acti
 
   return (
     <section className="card">
-      <h2>Harcama özeti</h2>
+      <h2 className="card-title">
+        <span className="icon">◔</span> Harcama özeti
+      </h2>
       <div className="big">
         {mon(state.spent)} <span className="muted">/ {mon(state.totalBudget)}</span>
       </div>

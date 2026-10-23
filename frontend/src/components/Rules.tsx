@@ -6,7 +6,9 @@ import { mon } from "../lib/format";
 export function Rules({ state }: { state: GuardState }) {
   return (
     <section className="card">
-      <h2>Kurallar</h2>
+      <h2 className="card-title">
+        <span className="icon">⛨</span> Kurallar
+      </h2>
       <dl className="stats">
         <dt>Tek işlem limiti</dt>
         <dd>{mon(state.perTxLimit)}</dd>
@@ -21,7 +23,7 @@ export function Rules({ state }: { state: GuardState }) {
             <a href={addressUrl(p.address)} target="_blank" rel="noreferrer">
               {labelOf(p.address)}
             </a>
-            <span className={p.allowed ? "badge ok" : "badge"}>{p.allowed ? "izinli" : "izinsiz"}</span>
+            <span className={p.allowed ? "pill ok" : "pill"}>{p.allowed ? "izinli" : "izinsiz"}</span>
           </li>
         ))}
       </ul>

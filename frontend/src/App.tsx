@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { BaseError, ContractFunctionRevertedError, type Address, type WalletClient } from "viem";
 import { ActivityFeed } from "./components/ActivityFeed";
+import { Backdrop } from "./components/Backdrop";
+import { FlowCard } from "./components/FlowCard";
 import { Header } from "./components/Header";
+import { Stats } from "./components/Stats";
 import { Mascot } from "./components/Mascot";
 import { PendingList } from "./components/PendingList";
 import { Rules } from "./components/Rules";
@@ -65,8 +68,13 @@ export default function App() {
     }
   }
 
+  const openPending = state?.pendings.filter((p) => p.status === 1).length ?? 0;
+  const lastDecision = activity.items.find((a) => ["Settled", "Rejected", "PendingCreated"].includes(a.kind))?.kind;
+
   return (
-    <div className="app">
+    <>
+      <Backdrop />
+      <div className="app">
       <Header account={wallet?.account ?? null} isOwner={isOwner} onConnect={onConnect} />
 
       {notice && (
@@ -81,23 +89,22 @@ export default function App() {
       )}
       {(stateError || activity.error) && <div className="notice bad">RPC hatası: {stateError ?? activity.error}</div>}
 
-      {!state ? (
-        <p className="muted">Sözleşme okunuyor…</p>
-      ) : (
-        <main className="grid">
-          <div className="col">
-            <Summary state={state} activity={activity.items} />
-            <Rules state={state} />
-          </div>
-          <div className="col center">
-            <Mascot />
-            <PendingList pendings={state.pendings} canAct={isOwner} busyId={busyId} onDecide={onDecide} />
-          </div>
-          <div className="col">
-            <ActivityFeed items={activity.items} pendings={state.pendings} loading={activity.loading} />
-          </div>
-        </main>
-      )}
-    </div>
+      <main className="grid">
+        <div className="col col-left">
+          <FlowCard items={activity.items} />
+          {state && <Rules state={state} />}
+        </div>
+        <div className="col col-center">
+          <Mascot live={!!state && !stateError} lastDecision={lastDecision} />
+          {state && <Stats items={activity.items} openPending={openPending} />}
+          {state && <PendingList pendings={state.pendings} canAct={isOwner} busyId={busyId} onDecide={onDecide} />}
+        </div>
+        <div className="col col-right">
+          {state ? <Summary state={state} activity={activity.items} /> : <div className="card muted">Sözleşme okunuyor…</div>}
+          <ActivityFeed items={activity.items} pendings={state?.pendings ?? []} loading={activity.loading} />
+        </div>
+      </main>
+      </div>
+    </>
   );
 }

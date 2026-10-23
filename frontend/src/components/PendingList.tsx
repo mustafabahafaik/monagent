@@ -17,7 +17,8 @@ export function PendingList({ pendings, canAct, busyId, onDecide }: Props) {
 
   return (
     <section className="card">
-      <h2>Onay bekleyenler {open.length > 0 && <span className="badge warn">{open.length}</span>}</h2>
+      <h2 className="card-title">
+        <span className="icon">⏳</span> Onay bekleyenler {open.length > 0 && <span className="pill warn">{open.length}</span>}</h2>
       {open.length === 0 && <p className="muted">Bekleyen ödeme yok.</p>}
       <ul className="list">
         {open.map((p) => (

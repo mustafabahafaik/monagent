@@ -53,7 +53,7 @@ agentguard/
 │   ├── services.js       # :4020 SecureScan / TestRunner Pro / GPU Burst
 │   └── agent.js          # 402 al → requestPayment → (Pending ise event bekle) → X-Payment-Tx ile tekrar
 └── frontend/             # Vite + React + TS + viem · npm run dev (önizleme: 5180)
-    ├── public/mascot.png # HENÜZ YOK
+    ├── public/mascot.png # kullanıcının maskotu (daire, şeffaf kenar)
     └── src/
         ├── config.ts     # ÜRETİLİR: Deploy.s.sol yazar, elle düzenleme
         ├── lib/          # chain (client, explorer, etiketler), abi, wallet, format
@@ -79,8 +79,9 @@ klasöre yazamıyor (fs_permissions). Vite iskeletini kurarken `frontend/src/con
 5. **Panel** 🟡: veri katmanı ve bileşenler çalışıyor (testnet'te canlı doğrulandı). Özet/limit/allowlist/
    scope/pending sözleşme durumundan (multicall), işlem akışı event'lerden. Onayla/Reddet önce simulate,
    sonra cüzdanla approvePending/rejectPending (gerçek cüzdanla henüz denenmedi).
-   **Eksik: `agentguard.html` tasarımı ve `public/mascot.png` henüz verilmedi** → index.css geçici;
-   gelince sadece görünüm değişecek, hook'lar aynı kalır.
+   Tasarım (2026-10-23, kullanıcının referans görsellerinden): mor-mavi gece teması, ortada maskot
+   (public/mascot.png, kullanıcının verdiği ekran görüntüsünden daire kırpıldı), iki yanında SVG Atakule +
+   Anıtkabir, arka planda dönen Monad amblemleri ve şehir silüeti. agentguard.html hiç verilmedi.
 6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
    README, explorer linkleri, yedek plan (RPC çökerse yedek RPC, ekran kaydı).
 
