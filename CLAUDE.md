@@ -8,16 +8,21 @@ Ben öğrenciyim. Bu projeyle Solidity, viem ve React öğrenmek istiyorum.
 - Her çalışan adımdan sonra commit önermeyi unutma.
 - Zincir adımlarını (faucet, deploy, private key) ben yaparım: sen yönlendir, sonra `cast` ile doğrula.
 
-## Fikir (varsayım: agentguard.md henüz yok, gelince burayı güncelle)
+## Fikir
 Bir yapay zekâ ajanı ücretli API'leri kullanırken para harcar. Servis önce
 **HTTP 402 Payment Required** döner: "şu kadar MON, şu adrese öde" der. Ajan
-doğrudan ödemez, **AgentGuard sözleşmesi** üzerinden öder. Sözleşme kuralları uygular:
-- tek ödeme üst sınırı (ör. 0.01 MON)
-- günlük bütçe (ör. 0.05 MON)
-- sadece izinli servis adreslerine (allowlist) ödeme
-- sahip her şeyi tek tuşla durdurabilir (pause)
+doğrudan ödemez, `AgentGuard.requestPayment(provider, amount, category, purposeHash)`
+çağırır; sözleşme kendi bakiyesinden öder. Owner kuralları koyar: `perTxLimit`,
+`totalBudget`, izinli alıcılar (allowlist), izinli kategoriler (scope).
 
-Panel, sahibin bütçeyi, ödeme geçmişini ve engellenen denemeleri canlı görmesini sağlar.
+Karar yolları (`contracts/src/AgentGuard.sol`):
+- limit / bütçe / kapsam / bakiye ihlali → `Rejected` event (revert yok, deneme zincirde görünür)
+- provider allowlist'te değil → `Pending` kaydı + `PendingCreated`; owner `approvePending` /
+  `rejectPending` ile karar verir, onaylanan provider allowlist'e eklenir
+- hepsi uygun → anında transfer + `Settled`
+- `category` ve `purposeHash` bytes32; servis, 402 requestId'sini `purposeHash` ile eşleştirir.
+
+Panel, owner'ın bütçeyi, ödeme akışını, bekleyen onayları ve reddedilenleri canlı görmesini sağlar.
 
 ## Teknoloji
 - `contracts/`: Foundry, Solidity
@@ -54,17 +59,16 @@ agentguard/
 ```
 
 ## 6 adımlık plan (her adım sonunda commit)
-1. **Sözleşme + testler**: `AgentGuard.sol` (deposit, pay, limitler, allowlist, pause,
-   `Paid` / `Blocked` event'leri). `forge test` yeşil olana kadar sadece yerelde çalış.
+1. **Sözleşme + testler** ✅: `AgentGuard.sol` + 20 test, her karar yolu kapsanıyor (`forge test`).
 2. **Testnet'e deploy**: Faucet'ten MON al, `forge script` ile deploy et, sözleşmeye
    bütçe yatır, servis adreslerini allowlist'e ekle. `cast call` ile doğrula.
 3. **402 servisleri**: Express'te 2-3 uç nokta. Ödeme kanıtı yoksa 402 + fiyat + adres +
-   requestId döner. Kanıt (tx hash) gelirse zincirden `Paid` event'ini kontrol edip 200 döner.
-4. **Ajan scripti**: `agent.js` servisleri sırayla çağırır, 402 gelince `pay()` yapar, tx
+   requestId döner. Kanıt (tx hash) gelirse zincirden `Settled` event'ini (purposeHash eşleşmeli) kontrol edip 200 döner.
+4. **Ajan scripti**: `agent.js` servisleri sırayla çağırır, 402 gelince `requestPayment()` çağırır, tx
    hash ile tekrar ister. Limit aşımı ve izinsiz servis senaryolarında reddedildiğini gösterir.
 5. **Panel**: viem ile bütçe/harcanan/kalan, canlı ödeme akışı (event'ler), engellenenler,
-   pause butonu ve limit ayarı (cüzdan bağlayarak). Tasarım `agentguard.html`'e göre.
-6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı engellendi → pause),
+   bekleyen ödemeleri onayla/reddet ve limit ayarı (cüzdan bağlayarak). Tasarım `agentguard.html`'e göre.
+6. **Demo provası**: 3 dakikalık senaryo (normal ödeme → limit aşımı reddedildi → yeni servis Pending → owner onayı),
    README, explorer linkleri, yedek plan (RPC çökerse yedek RPC, ekran kaydı).
 
 ## Zaman kutusu (tek gün)
