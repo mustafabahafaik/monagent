@@ -60,7 +60,7 @@ agentguard/
 
 ## 6 adımlık plan (her adım sonunda commit)
 1. **Sözleşme + testler** ✅: `AgentGuard.sol` + 20 test, her karar yolu kapsanıyor (`forge test`).
-2. **Testnet'e deploy**: Faucet'ten MON al, `forge script` ile deploy et, sözleşmeye
+2. **Testnet'e deploy** ✅: Faucet'ten MON al, `forge script` ile deploy et, sözleşmeye
    bütçe yatır, servis adreslerini allowlist'e ekle. `cast call` ile doğrula.
 3. **402 servisleri**: Express'te 2-3 uç nokta. Ödeme kanıtı yoksa 402 + fiyat + adres +
    requestId döner. Kanıt (tx hash) gelirse zincirden `Settled` event'ini (purposeHash eşleşmeli) kontrol edip 200 döner.
@@ -74,3 +74,13 @@ agentguard/
 ## Zaman kutusu (tek gün)
 Adım 1-2: ~2 saat · Adım 3-4: ~2 saat · Adım 5: ~3 saat · Adım 6: ~1 saat.
 Geride kalırsan önce paneldeki yazma özelliklerini (limit ayarı) kes, okuma kısmı yeter.
+
+## Testnet durumu (2026-10-23)
+- AgentGuard: `0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184` (MonadVision'da doğrulandı, sourcify)
+  https://testnet.monadvision.com/address/0x95DC88A2161226bCCF6A0f26A0b6a8A055cD7184
+- owner: `0x3bC0672612EfD112FB765f73dC3BE1F82E5a4435` (monad-racer deployer'ı ile aynı)
+- agent: `0x3ecD4dbfC1cfeAa12213A74662C17F18a33e5881` (key: server/.env AGENT_PRIVATE_KEY)
+- provider weather (allowlist'te): `0x6416118B3e7e90F5DBb6Bf61dd2B9899bDa749ED`
+- provider translate (allowlist'te değil → Pending demosu): `0x6F2287fef14eBD17ddE2FA67c97098AB19c90072`
+- Kurallar: perTx 0.01 MON, totalBudget 0.05 MON, kategoriler `data` ve `ai` (keccak256), `gambling` kapalı
+- Key'ler sadece `contracts/.env` ve `server/.env` içinde (ikisi de gitignore'da).

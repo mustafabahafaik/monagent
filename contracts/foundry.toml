@@ -2,5 +2,13 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+solc = "0.8.28"
+evm_version = "cancun"
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+# Explorer doğrulaması için: IPFS hash'i kapalı, kaynak kod metadata'ya gömülür
+bytecode_hash = "none"
+use_literal_content = true
+
+# --rpc-url monad_testnet yazınca kullanılacak adres
+[rpc_endpoints]
+monad_testnet = "https://testnet-rpc.monad.xyz"
