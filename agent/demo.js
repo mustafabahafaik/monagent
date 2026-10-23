@@ -286,8 +286,11 @@ async function main() {
   }
 
   console.log();
+  if (args.has("--exit")) {
+    log.ok("demo turu bitti · --exit: servisler ve panel kapatılıyor"); // otomatik testler için
+    shutdown(0);
+  }
   log.ok(`demo turu bitti · panel açık: ${panelUrl} · kapatmak için Ctrl+C`);
-  if (args.has("--exit")) shutdown(0); // otomatik testler için
 }
 
 main().catch((err) => {
