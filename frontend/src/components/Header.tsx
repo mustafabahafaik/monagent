@@ -11,9 +11,8 @@ export function Header({ account, isOwner, onConnect }: Props) {
   return (
     <header className="header">
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true">
-          MA
-        </span>
+        {/* Maskot silüeti: mascot.png'nin şeffaflığı CSS mask olarak kullanılır, renk background'dan gelir */}
+        <span className="brand-mascot" aria-hidden="true" />
         <strong>MONAGENT</strong>
       </div>
       <div className="header-right">

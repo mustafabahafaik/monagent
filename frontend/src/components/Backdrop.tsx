@@ -4,17 +4,7 @@
 import { useEffect, useRef } from "react";
 import { MonadLogo } from "./MonadLogo";
 import { Skyline } from "./Skyline";
-
-const STARS = Array.from({ length: 70 }, (_, i) => {
-  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1; // sabit sözde-rastgele
-  return {
-    left: `${r(1) * 100}%`,
-    top: `${r(2) * 70}%`,
-    size: 1 + r(3) * 2.2,
-    delay: `${r(4) * 6}s`,
-    duration: `${4 + r(5) * 6}s`,
-  };
-});
+import { StarField } from "./StarField";
 
 export function Backdrop() {
   const ref = useRef<HTMLDivElement>(null);
@@ -42,14 +32,9 @@ export function Backdrop() {
   return (
     <div className="backdrop" ref={ref} aria-hidden="true">
       <div className="backdrop-grid" />
+      {/* Yıldızlar en arkada: DOM sırası gereği Monad amblemleri ve Ankara silüeti önlerinde kalır */}
       <div className="layer layer-stars">
-        {STARS.map((s, i) => (
-          <span
-            key={i}
-            className="star"
-            style={{ left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay, animationDuration: s.duration }}
-          />
-        ))}
+        <StarField />
       </div>
       <div className="layer layer-logos">
         <MonadLogo size={760} className="bg-logo bg-logo-main" />
